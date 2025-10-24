@@ -31,26 +31,26 @@ export function StartScreen({ onStart, onBackToMain }: StartScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#001e5a] relative flex items-center justify-center">
+    <div className="min-h-screen bg-[#001e5a] relative flex items-center justify-center overflow-y-auto">
       {/* Logo */}
-      <div className="absolute top-6 left-6">
-        <CareLogo size="lg" color="white" onClick={onBackToMain} />
+      <div className="absolute top-4 left-4">
+        <CareLogo size="md" color="white" onClick={onBackToMain} />
       </div>
 
       {/* System Header */}
-      <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
         <div className="text-center">
         </div>
       </div>
 
       {/* Main Card */}
-      <div className="w-full max-w-lg mx-4">
-        <div className="bg-white rounded-t-[160px] pt-20 pb-12 px-12 shadow-2xl">
-          <h1 className="text-[#001e5a] text-3xl text-center mb-12" style={{ fontWeight: 600 }}>
+      <div className="w-full max-w-lg mx-4 mt-16 mb-8">
+        <div className="bg-white rounded-t-[120px] pt-12 pb-8 px-8 shadow-2xl">
+          <h1 className="text-[#001e5a] text-2xl text-center mb-8" style={{ fontWeight: 600 }}>
             고객 정보 입력
           </h1>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Customer Name */}
             <div>
               <Label htmlFor="customerName" className="text-[#363636] text-sm mb-2 block">

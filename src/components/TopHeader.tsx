@@ -3,7 +3,7 @@ import { CareLogo } from './CareLogo';
 
 interface TopHeaderProps {
   isRecording: boolean;
-  onMiniMode: () => void;
+  onViewHistory: () => void;
   onStartStop: () => void;
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
@@ -12,7 +12,7 @@ interface TopHeaderProps {
 
 export function TopHeader({ 
   isRecording, 
-  onMiniMode, 
+  onViewHistory, 
   onStartStop,
   onToggleSidebar,
   isSidebarOpen = true,
@@ -53,8 +53,8 @@ export function TopHeader({
       </div>
       
       <div className="flex gap-3">
-        <ActionButton onClick={onMiniMode} variant="secondary">
-          미니 모드
+        <ActionButton onClick={onViewHistory} variant="secondary">
+          상담 내역
         </ActionButton>
         <ActionButton 
           onClick={onStartStop} 

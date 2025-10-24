@@ -10,7 +10,7 @@ interface SavedNote {
   timestamp: Date;
 }
 
-interface ConsultationHistory {
+export interface ConsultationHistory {
   id: string;
   customerName: string;
   phoneNumber: string;
@@ -45,17 +45,28 @@ interface ConsultationHistoryListProps {
   histories?: ConsultationHistory[];
   onSelectHistory?: (history: ConsultationHistory) => void;
   customerNo?: string; // 특정 고객의 상담내역만 보려면
+  initialSearchQuery?: string; // 초기 검색어
+  filterByCustomer?: { name: string; phone: string }; // 고객별 필터링
 }
 
 export function ConsultationHistoryList({ 
   histories, 
   onSelectHistory, 
-  customerNo 
+  customerNo,
+  initialSearchQuery = '',
+  filterByCustomer
 }: ConsultationHistoryListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [dbHistories, setDbHistories] = useState<ConsultationHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // 초기 검색어 설정
+  useEffect(() => {
+    if (initialSearchQuery) {
+      setSearchQuery(initialSearchQuery);
+    }
+  }, [initialSearchQuery]);
 
   // Supabase에서 직접 상담내역 가져오기
   useEffect(() => {
@@ -78,16 +89,6 @@ export function ConsultationHistoryList({
         const consultations = response.data || response;
         
         console.log('추출된 상담 데이터:', consultations);
-        console.log('데이터 타입:', typeof consultations);
-        console.log('데이터 길이:', consultations?.length);
-        
-        // 실제 DB 데이터가 있는지 확인
-        if (consultations && Array.isArray(consultations) && consultations.length > 0) {
-          console.log('실제 DB에서 상담 데이터를 가져왔습니다:', consultations.length, '건');
-        } else {
-          console.log('DB에 상담 데이터가 없습니다. 빈 배열을 반환합니다.');
-          console.log('응답 데이터:', consultations);
-        }
         
         // 데이터 변환 - 간단한 형태로
         const convertedHistories: ConsultationHistory[] = (consultations || []).map((consultation: any) => {
@@ -112,7 +113,28 @@ export function ConsultationHistoryList({
         });
         
         console.log('변환된 상담내역:', convertedHistories);
-        setDbHistories(convertedHistories);
+        
+        // 테스트용: 데이터가 없으면 간단한 목업 데이터 추가
+        if (convertedHistories.length === 0) {
+          console.log('실제 데이터가 없으므로 테스트용 목업 데이터를 추가합니다.');
+          const mockData = [{
+            id: 'test-1',
+            customerName: '테스트고객',
+            phoneNumber: '010-1234-5678',
+            timestamp: new Date(),
+            violationCount: 2,
+            feedbacks: [],
+            savedNotes: [{
+              id: 'note-test-1',
+              text: '테스트 상담 내용입니다.',
+              timestamp: new Date()
+            }]
+          }];
+          console.log('목업 데이터:', mockData);
+          setDbHistories(mockData);
+        } else {
+          setDbHistories(convertedHistories);
+        }
       } catch (err) {
         console.error('상담내역을 가져오는 중 오류 발생:', err);
         console.error('오류 상세:', err);
@@ -132,7 +154,16 @@ export function ConsultationHistoryList({
   }, [customerNo]);
 
   const allHistories = [...(histories || []), ...dbHistories];
-  const filteredHistories = allHistories.filter(h => {
+  
+  // 고객별 필터링 적용
+  const filteredByCustomer = filterByCustomer 
+    ? allHistories.filter(h => 
+        h.customerName.toLowerCase().includes(filterByCustomer.name.toLowerCase()) ||
+        h.phoneNumber.includes(filterByCustomer.phone)
+      )
+    : allHistories;
+  
+  const filteredHistories = filteredByCustomer.filter(h => {
     if (!searchQuery.trim()) return true;
     
     const query = searchQuery.toLowerCase();
@@ -181,10 +212,10 @@ export function ConsultationHistoryList({
   };
 
   return (
-    <div className="w-full h-full bg-white border-2 border-[#242760] rounded-2xl flex flex-col p-4">
+    <div className="w-full h-full bg-white border-2 border-[#242760] rounded-2xl flex flex-col px-4 py-4">
       {/* Header - 고정 */}
-      <div className="py-2 px-3 border-b border-gray-200 flex-shrink-0">
-        <h2 className="text-base text-[#242760] mb-1 font-semibold">상담 내역</h2>
+      <div className="py-3 px-3 border-b border-gray-200 flex-shrink-0">
+        <h2 className="text-lg text-[#242760] mb-2 font-semibold">상담 내역</h2>
         
         {/* Search */}
         <div className="relative">
@@ -199,20 +230,17 @@ export function ConsultationHistoryList({
       </div>
 
       {/* History List - 스크롤 가능한 영역 */}
-      <div 
-        className="overflow-y-auto p-2 custom-scrollbar h-[calc(100vh-220px)]" 
-        style={{ 
-          scrollbarWidth: 'thin', 
-          scrollbarColor: '#4B5563 #F3F4F6',
-          maxHeight: 'calc(100vh - 220px)'
-        }}
-      >
+      <div className="flex-1 overflow-y-auto p-2 min-h-0" 
+           style={{ 
+             scrollbarWidth: 'thin', 
+             scrollbarColor: '#4B5563 #F3F4F6'
+           }}>
         {loading ? (
-          <div className="flex items-center justify-center h-32">
+          <div className="flex items-center justify-center h-full">
             <div className="text-gray-500 text-sm">상담내역을 불러오는 중...</div>
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center h-32">
+          <div className="flex items-center justify-center h-full">
             <div className="text-red-500 text-sm">
               <div className="font-semibold mb-2">상담 내역을 불러올 수 없습니다</div>
               <div className="text-xs">{error}</div>
@@ -222,7 +250,7 @@ export function ConsultationHistoryList({
             </div>
           </div>
         ) : filteredHistories.length === 0 ? (
-          <div className="flex items-center justify-center h-32">
+          <div className="flex items-center justify-center h-full">
             <div className="text-gray-500 text-sm">상담내역이 없습니다.</div>
           </div>
         ) : (
@@ -231,17 +259,28 @@ export function ConsultationHistoryList({
             {filteredHistories.map((history) => (
               <div
                 key={history.id}
-                className="p-2 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 cursor-pointer bg-white shadow-sm hover:shadow-md"
-                onClick={() => onSelectHistory?.(history)}
+                className="p-3 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 cursor-pointer bg-white shadow-sm hover:shadow-md mb-2"
+                onClick={() => {
+                  console.log('고객 클릭됨:', history);
+                  onSelectHistory?.(history);
+                }}
               >
                 {/* 고객명, 전화번호, 시간만 표시 */}
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-gray-900 font-semibold text-xs">{history.customerName}</span>
-                    <span className="text-xs text-gray-600 mt-0.5">{history.phoneNumber}</span>
+                    <span className="text-gray-900 font-semibold text-sm">{history.customerName}</span>
+                    <span className="text-sm text-gray-600 mt-1">{history.phoneNumber}</span>
+                    {history.savedNotes && history.savedNotes.length > 0 && (
+                      <span className="text-xs text-gray-500 mt-1 truncate">
+                        상담 요약: {history.savedNotes[0].text}
+                      </span>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-gray-500 font-medium">{getTimeAgo(history.timestamp)}</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {formatConsultationTime(history.timestamp)}
+                    </div>
                   </div>
                 </div>
               </div>

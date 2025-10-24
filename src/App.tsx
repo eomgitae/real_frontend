@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { StartScreen } from './components/StartScreen';
 import { ConsultationScreen } from './components/ConsultationScreen';
-import { SummaryScreen } from './components/SummaryScreen';
 import { MainMenu } from './components/MainMenu';
 import { ConsultationHistoryScreen } from './components/ConsultationHistoryScreen';
 import { FeedbackItem } from './components/FeedbackCard';
 import { ConnectionTest } from './components/ConnectionTest';
 import { Button } from './components/ui/button';
 
-type Screen = 'main' | 'start' | 'consultation' | 'summary' | 'history' | 'connection-test';
+type Screen = 'main' | 'start' | 'consultation' | 'history' | 'connection-test';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('main');
@@ -19,25 +18,19 @@ export default function App() {
 
   console.log('현재 화면:', screen);
 
-  const handleStartConsultation = () => {
-    console.log('handleStartConsultation 호출됨');
-    console.log('고객 정보 입력 화면으로 이동');
-    setScreen('start');
-    console.log('화면 상태 변경됨:', 'start');
+  const handleStartConsultation = (name: string, phone: string) => {
+    console.log('handleStartConsultation 호출됨', { name, phone });
+    setCustomerName(name);
+    setPhoneNumber(phone);
+    setScreen('consultation');
+    console.log('화면 상태 변경됨:', 'consultation');
   };
 
   const handleViewHistory = () => {
     console.log('handleViewHistory 호출됨');
-    console.log('상담내역 조회 화면으로 이동');
+    console.log('통합된 상담내역 화면으로 이동');
     setScreen('history');
     console.log('화면 상태 변경됨:', 'history');
-  };
-
-  const handleConnectionTest = () => {
-    console.log('handleConnectionTest 호출됨');
-    console.log('연결 테스트 화면으로 이동');
-    setScreen('connection-test');
-    console.log('화면 상태 변경됨:', 'connection-test');
   };
 
   const handleBackToMain = () => {
@@ -90,14 +83,17 @@ export default function App() {
       <MainMenu 
         onStartConsultation={handleStartConsultation}
         onViewHistory={handleViewHistory}
-        onConnectionTest={handleConnectionTest}
       />
     );
   }
 
   if (screen === 'history') {
     return (
-      <ConsultationHistoryScreen onBackToMain={handleBackToMain} />
+      <ConsultationHistoryScreen 
+        onBackToMain={handleBackToMain}
+        customerName={customerName}
+        phoneNumber={phoneNumber}
+      />
     );
   }
 
@@ -118,14 +114,6 @@ export default function App() {
     );
   }
 
-  if (screen === 'summary') {
-    return (
-      <SummaryScreen 
-        onNewConsultation={handleNewConsultation}
-        onBackToMain={handleBackToMain}
-      />
-    );
-  }
 
   return (
     <ConsultationScreen 

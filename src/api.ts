@@ -154,10 +154,18 @@ export const backendApi = {
             
             const result = await res.json()
             console.log('팩트체크 API 응답 데이터:', result)
-            return result
+            
+            // 새로운 응답 형태 처리
+            if (result.success === false) {
+                console.warn('팩트체크 조회 실패:', result.error)
+                return []
+            }
+            
+            return result.data || result
         } catch (error) {
             console.error('팩트체크 API 호출 실패:', error)
-            throw error
+            // 에러 발생 시 빈 배열 반환하여 화면이 깨지지 않도록 함
+            return []
         }
     },
 

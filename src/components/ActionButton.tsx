@@ -17,7 +17,7 @@ export function ActionButton({
     switch (variant) {
       case 'primary':
         return {
-          background: 'linear-gradient(90deg, rgb(227, 5, 128) 0%, rgb(227, 5, 128) 100%)',
+          background: 'rgb(227, 5, 128)',
           color: 'white'
         };
       case 'secondary':

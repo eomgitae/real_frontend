@@ -40,7 +40,6 @@ export function ConsultationScreen({ customerName, phoneNumber, onEndConsultatio
   const [messages, setMessages] = useState<Message[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isRecording, setIsRecording] = useState(false);
-  const [isMiniMode, setIsMiniMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePopup, setActivePopup] = useState<{
     type: 'high' | 'medium';
@@ -180,61 +179,23 @@ export function ConsultationScreen({ customerName, phoneNumber, onEndConsultatio
     setActivePopup(null);
   };
 
-  const handleMiniMode = () => {
-    setIsMiniMode(!isMiniMode);
+  const handleViewHistory = () => {
+    console.log('상담 내역 조회 버튼 클릭됨');
+    if (onBackToMain) {
+      onBackToMain();
+    }
   };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  if (isMiniMode) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-8">
-        <Toaster position="top-center" />
-        
-        <div className="w-full max-w-2xl">
-          <div className="bg-[#00387a] text-white p-4 rounded-t-xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span>STT 진행 중 [{sessionInfo.sessionId}]</span>
-            </div>
-            <div className="flex gap-2">
-              <ActionButton onClick={handleMiniMode} variant="secondary">
-                전체 모드
-              </ActionButton>
-              <ActionButton 
-                onClick={handleStartStop} 
-                variant={isRecording ? 'stop' : 'primary'}
-              >
-                {isRecording ? '상담 종료' : '상담 시작'}
-              </ActionButton>
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 rounded-b-xl overflow-hidden">
-            <ConversationPanel 
-              messages={messages} 
-              isRecording={isRecording}
-              feedbacks={feedbacks}
-              miniMode={true}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <div className="p-4 bg-blue-100 text-blue-800 text-sm">
-        상담 화면 로드됨 - 고객: {customerName}, 전화번호: {phoneNumber}
-      </div>
-      
       {/* Top Header - Fixed */}
       <TopHeader 
         isRecording={isRecording}
-        onMiniMode={handleMiniMode}
+        onViewHistory={handleViewHistory}
         onStartStop={handleStartStop}
         onToggleSidebar={toggleSidebar}
         isSidebarOpen={isSidebarOpen}
@@ -250,9 +211,9 @@ export function ConsultationScreen({ customerName, phoneNumber, onEndConsultatio
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
         {isSidebarOpen && (
-          <div className="w-[340px] bg-[#001e5a] relative flex flex-col">
+          <div className="w-[300px] bg-[#001e5a] relative flex flex-col">
             {/* Customer Info Panel */}
-            <div className="flex-1 overflow-y-auto pb-20 pt-6">
+            <div className="flex-1 overflow-y-auto pb-16 pt-4">
               <CustomerInfoPanel customerInfo={customerInfo} />
             </div>
 
@@ -264,7 +225,7 @@ export function ConsultationScreen({ customerName, phoneNumber, onEndConsultatio
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Content Area */}
-          <div className="flex-1 p-6 overflow-hidden">
+          <div className="flex-1 p-4 overflow-hidden">
             {/* Chat Area */}
             <ConversationPanel 
               messages={messages} 
